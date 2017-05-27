@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 
 	"github.com/kthomas/go-amqputil"
 	"github.com/kthomas/go-logger"
@@ -17,17 +19,25 @@ func (c *GdaxTickerMessageConsumer) Deliver(msg *amqp.Delivery) error {
 	err := json.Unmarshal(msg.Body, &gdaxMessage)
 	if err == nil {
 		c.log.Debugf("Unmarshaled AMQP message body to GDAX message: %s", gdaxMessage)
-		err = gdaxMessage.CreateTick()
-		if err == nil {
-			c.log.Debugf("Persisted GDAX message: %s", gdaxMessage)
-			msg.Ack(false)
-		} else {
-			c.log.Errorf("Failed to persist GDAX message: %s", err)
-			if !msg.Redelivered {
-				return amqputil.AmqpDeliveryErrRequireRequeue
+		if gdaxMessage.Type == "match" {
+			c.log.Debugf("Persisting GDAX 'match' message: %s", gdaxMessage)
+
+			err = gdaxMessage.CreateTick()
+			if err == nil {
+				c.log.Debugf("Persisted GDAX message: %s", gdaxMessage)
+				msg.Ack(false)
 			} else {
-				c.log.Errorf("GDAX message has already failed redelivery attempt, dropping message: %s", err)
+				c.log.Errorf("Failed to persist GDAX message: %s", err)
+				if !msg.Redelivered {
+					return amqputil.AmqpDeliveryErrRequireRequeue
+				} else {
+					c.log.Errorf("GDAX message has already failed redelivery attempt, dropping message: %s", err)
+				}
 			}
+		} else {
+			msg := fmt.Sprintf("Dropping GDAX '%s' message: %s", gdaxMessage.Type, gdaxMessage)
+			c.log.Debugf(msg)
+			errors.New(msg)
 		}
 	} else {
 		c.log.Debugf("Failed to parse GDAX message: %s; %s", msg.Body, err)
