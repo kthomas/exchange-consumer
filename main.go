@@ -3,27 +3,37 @@ package main
 import (
 	"sync"
 
-	"github.com/kthomas/go-logger"
 	"github.com/kthomas/go-amqputil"
+	"github.com/kthomas/go-logger"
 )
 
 var (
-	Log = logger.NewLogger("AMQP", "debug", true)
+	Log       = logger.NewLogger("exchange-consumer", "INFO", true)
 	WaitGroup sync.WaitGroup
 
 	Consumers = []*amqputil.Consumer{
-		GdaxMessageConsumerFactory(Log, "BTC-USD"),
-		GdaxMessageConsumerFactory(Log, "ETH-USD"),
-		GdaxMessageConsumerFactory(Log, "ETH-BTC"),
+		//GdaxMessageConsumerFactory(Log, "BTC-USD"),
+		//GdaxMessageConsumerFactory(Log, "ETH-USD"),
+		//GdaxMessageConsumerFactory(Log, "ETH-BTC"),
+		GdaxMessageConsumerFactory(Log, "LTC-USD"),
 
-		OandaMessageConsumerFactory(Log, "EUR-USD"),
-		OandaMessageConsumerFactory(Log, "USD-CNY"),
-		OandaMessageConsumerFactory(Log, "USD-JPY"),
+		//OandaMessageConsumerFactory(Log, "EUR-USD"),
+		//OandaMessageConsumerFactory(Log, "USD-CNY"),
+		//OandaMessageConsumerFactory(Log, "USD-JPY"),
 	}
 )
 
 func bootstrap() {
 	MigrateSchema()
+}
+
+func setupLogging() {
+	prefix := "exchange-consumer"
+	lvl := "INFO"
+	console := true
+
+	Log = logger.NewLogger(prefix, lvl, console)
+	Log.Infof("Logging initialized; log level: %s", lvl)
 }
 
 func run() {
@@ -41,6 +51,8 @@ func runConsumer(consumer *amqputil.Consumer) {
 }
 
 func main() {
+	// FIXME-- reintroduce this if warehousing historical price data is
+	setupLogging()
 	bootstrap()
 	run()
 
