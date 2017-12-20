@@ -11,6 +11,12 @@ import (
 	"github.com/streadway/amqp"
 )
 
+var r *rand.Rand
+
+func init() {
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+}
+
 type GdaxTickerMessageConsumer struct {
 	log  *logger.Logger
 	tick func(*GdaxMessage) error
@@ -54,7 +60,7 @@ func newGdaxTickerMessageConsumer(lg *logger.Logger, tickFn func(*GdaxMessage) e
 
 	config := amqputil.AmqpConfigFactory(queue)
 
-	tag := fmt.Sprintf("exchange-consumer-%s", rand.New(rand.NewSource(time.Now().UnixNano())))
+	tag := fmt.Sprintf("exchange-consumer-gdax-%s-%s", queue, randomString(12))
 	c, err := amqputil.NewConsumer(lg, config, tag, delegate)
 	if err != nil {
 		lg.Errorf("Failed to initialize AMQP consumer instance with config %s; %s", config, err)
@@ -107,7 +113,7 @@ func newOandaTickerMessageConsumer(lg *logger.Logger, tickFn func(*OandaMessage)
 
 	config := amqputil.AmqpConfigFactory(queue)
 
-	tag := fmt.Sprintf("exchange-consumer-%s", rand.New(rand.NewSource(time.Now().UnixNano())))
+	tag := fmt.Sprintf("exchange-consumer-oanda-%s-%s", queue, randomString(12))
 	c, err := amqputil.NewConsumer(lg, config, tag, delegate)
 	if err != nil {
 		lg.Errorf("Failed to initialize AMQP consumer instance with config %s; %s", config, err)
@@ -115,4 +121,13 @@ func newOandaTickerMessageConsumer(lg *logger.Logger, tickFn func(*OandaMessage)
 	}
 
 	return c, nil
+}
+
+func randomString(strlen int) string {
+	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+	result := make([]byte, strlen)
+	for i := range result {
+		result[i] = chars[r.Intn(len(chars))]
+	}
+	return string(result)
 }
