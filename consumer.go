@@ -17,7 +17,15 @@ func (c *GdaxTickerMessageConsumer) Deliver(msg *amqp.Delivery) error {
 	err := json.Unmarshal(msg.Body, &gdaxMessage)
 	if err == nil {
 		c.log.Debugf("Unmarshaled AMQP message body to GDAX message: %s", gdaxMessage)
-		err = gdaxMessage.CreateTick()
+		// FIXME-- reintroduce this if historical pricing data is needed... err = gdaxMessage.CreateTick()
+		//gdaxMessage.CreateTick()
+		//gdaxMessage.Tick()
+
+		if gdaxMessage.Type == "done" && gdaxMessage.Reason == "filled" && gdaxMessage.Price != "" {
+			c.log.Infof("%s", gdaxMessage)
+			c.log.Infof("FILLED @ %s", gdaxMessage.Price)
+		}
+
 		if err == nil {
 			c.log.Debugf("Persisted GDAX message: %s", gdaxMessage)
 			msg.Ack(false)
