@@ -23,10 +23,6 @@ var (
 	}
 )
 
-func bootstrap() {
-	MigrateSchema()
-}
-
 func setupLogging() {
 	prefix := "exchange-consumer"
 	lvl := "INFO"
@@ -51,9 +47,7 @@ func runConsumer(consumer *amqputil.Consumer) {
 }
 
 func main() {
-	// FIXME-- reintroduce this if warehousing historical price data is
 	setupLogging()
-	bootstrap()
 	run()
 
 	WaitGroup.Wait()

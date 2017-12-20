@@ -17,9 +17,6 @@ func (c *GdaxTickerMessageConsumer) Deliver(msg *amqp.Delivery) error {
 	err := json.Unmarshal(msg.Body, &gdaxMessage)
 	if err == nil {
 		c.log.Debugf("Unmarshaled AMQP message body to GDAX message: %s", gdaxMessage)
-		// FIXME-- reintroduce this if historical pricing data is needed... err = gdaxMessage.CreateTick()
-		//gdaxMessage.CreateTick()
-		//gdaxMessage.Tick()
 
 		if gdaxMessage.Type == "done" && gdaxMessage.Reason == "filled" && gdaxMessage.Price != "" {
 			c.log.Infof("%s", gdaxMessage)
@@ -77,7 +74,8 @@ func (c *OandaTickerMessageConsumer) Deliver(msg *amqp.Delivery) error {
 	if err == nil {
 		c.log.Debugf("Unmarshaled AMQP message body to OANDA message: %s", oandaMessage)
 		if oandaMessage.Type != "HEARTBEAT" {
-			err = oandaMessage.CreateTick()
+			c.log.Warningf("OANDA AMQP message no-op")
+
 			if err == nil {
 				c.log.Debugf("Persisted OANDA message: %s", oandaMessage)
 				msg.Ack(false)
