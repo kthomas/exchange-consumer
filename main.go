@@ -2,6 +2,9 @@ package exchangeconsumer
 
 import (
 	"encoding/json"
+	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/kthomas/go-amqputil"
 	"github.com/kthomas/go-logger"
@@ -51,7 +54,8 @@ func newGdaxTickerMessageConsumer(lg *logger.Logger, tickFn func(*GdaxMessage) e
 
 	config := amqputil.AmqpConfigFactory(queue)
 
-	c, err := amqputil.NewConsumer(lg, config, "exchange-consumer", delegate)
+	tag := fmt.Sprintf("exchange-consumer-%s", rand.New(rand.NewSource(time.Now().UnixNano())))
+	c, err := amqputil.NewConsumer(lg, config, tag, delegate)
 	if err != nil {
 		lg.Errorf("Failed to initialize AMQP consumer instance with config %s; %s", config, err)
 		return nil, err
@@ -103,7 +107,8 @@ func newOandaTickerMessageConsumer(lg *logger.Logger, tickFn func(*OandaMessage)
 
 	config := amqputil.AmqpConfigFactory(queue)
 
-	c, err := amqputil.NewConsumer(lg, config, "exchange-consumer", delegate)
+	tag := fmt.Sprintf("exchange-consumer-%s", rand.New(rand.NewSource(time.Now().UnixNano())))
+	c, err := amqputil.NewConsumer(lg, config, tag, delegate)
 	if err != nil {
 		lg.Errorf("Failed to initialize AMQP consumer instance with config %s; %s", config, err)
 		return nil, err
