@@ -1,19 +1,8 @@
-package main
+package exchangeconsumer
 
 import (
 	"time"
 )
-
-type Model struct {
-	ID     uint   `gorm:"primary_key",json:"id"`
-	Errors Errors `gorm:"-",json:"-"`
-}
-
-type Error struct {
-	Message string `json:"message"`
-	Status  int    `json:"status"`
-}
-type Errors []Error
 
 type GdaxMessage struct {
 	Sequence  int64     `json:"sequence"`
