@@ -12,14 +12,9 @@ var (
 	WaitGroup sync.WaitGroup
 
 	Consumers = []*amqputil.Consumer{
-		//GdaxMessageConsumerFactory(Log, "BTC-USD"),
-		//GdaxMessageConsumerFactory(Log, "ETH-USD"),
-		//GdaxMessageConsumerFactory(Log, "ETH-BTC"),
+		GdaxMessageConsumerFactory(Log, "BTC-USD"),
+		GdaxMessageConsumerFactory(Log, "ETH-USD"),
 		GdaxMessageConsumerFactory(Log, "LTC-USD"),
-
-		//OandaMessageConsumerFactory(Log, "EUR-USD"),
-		//OandaMessageConsumerFactory(Log, "USD-CNY"),
-		//OandaMessageConsumerFactory(Log, "USD-JPY"),
 	}
 )
 
