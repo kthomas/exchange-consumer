@@ -3,19 +3,12 @@ package exchangeconsumer
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"time"
 
 	"github.com/kthomas/go-amqputil"
 	"github.com/kthomas/go-logger"
 	"github.com/streadway/amqp"
 )
-
-var r *rand.Rand
-
-func init() {
-	r = rand.New(rand.NewSource(time.Now().UnixNano()))
-}
 
 type GdaxTickerMessageConsumer struct {
 	log  *logger.Logger
@@ -34,9 +27,8 @@ func (c *GdaxTickerMessageConsumer) Deliver(msg *amqp.Delivery) error {
 			c.log.Warningf("Failed to handle GDAX message: %s; error: %s", gdaxMessage, err)
 			if !msg.Redelivered {
 				return amqputil.AmqpDeliveryErrRequireRequeue
-			} else {
-				c.log.Errorf("GDAX message has already failed redelivery attempt, dropping message: %s", err)
 			}
+			c.log.Errorf("GDAX message has already failed redelivery attempt, dropping message: %s", err)
 		}
 	} else {
 		c.log.Debugf("Failed to parse GDAX message: %s; %s", msg.Body, err)
@@ -60,7 +52,7 @@ func newGdaxTickerMessageConsumer(lg *logger.Logger, tickFn func(*GdaxMessage) e
 
 	config := amqputil.AmqpConfigFactory(queue)
 
-	tag := fmt.Sprintf("exchange-consumer-gdax-%s-%s", queue, randomString(12))
+	tag := fmt.Sprintf("exchange-consumer-gdax-%s-%d", queue, time.Now().UnixNano())
 	c, err := amqputil.NewConsumer(lg, config, tag, delegate)
 	if err != nil {
 		lg.Errorf("Failed to initialize AMQP consumer instance with config %s; %s", config, err)
@@ -87,9 +79,8 @@ func (c *OandaTickerMessageConsumer) Deliver(msg *amqp.Delivery) error {
 			c.log.Warningf("Failed to handle OANDA message: %s; error: %s", oandaMessage, err)
 			if !msg.Redelivered {
 				return amqputil.AmqpDeliveryErrRequireRequeue
-			} else {
-				c.log.Errorf("GDAX message has already failed redelivery attempt, dropping message: %s", err)
 			}
+			c.log.Errorf("GDAX message has already failed redelivery attempt, dropping message: %s", err)
 		}
 	} else {
 		c.log.Debugf("Failed to parse GDAX message: %s; %s", msg.Body, err)
@@ -113,7 +104,7 @@ func newOandaTickerMessageConsumer(lg *logger.Logger, tickFn func(*OandaMessage)
 
 	config := amqputil.AmqpConfigFactory(queue)
 
-	tag := fmt.Sprintf("exchange-consumer-oanda-%s-%s", queue, randomString(12))
+	tag := fmt.Sprintf("exchange-consumer-oanda-%s-%d", queue, time.Now().UnixNano())
 	c, err := amqputil.NewConsumer(lg, config, tag, delegate)
 	if err != nil {
 		lg.Errorf("Failed to initialize AMQP consumer instance with config %s; %s", config, err)
@@ -121,13 +112,4 @@ func newOandaTickerMessageConsumer(lg *logger.Logger, tickFn func(*OandaMessage)
 	}
 
 	return c, nil
-}
-
-func randomString(strlen int) string {
-	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
-	result := make([]byte, strlen)
-	for i := range result {
-		result[i] = chars[r.Intn(len(chars))]
-	}
-	return string(result)
 }
