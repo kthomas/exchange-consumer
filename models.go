@@ -5,7 +5,7 @@ import (
 )
 
 type GdaxMessage struct {
-	Sequence  int64     `json:"sequence"`
+	Sequence  uint64    `json:"sequence"`
 	Type      string    `json:"type"`
 	Timestamp time.Time `json:"time"`
 	ProductId string    `json:"product_id"`
